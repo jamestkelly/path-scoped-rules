@@ -2,6 +2,8 @@
   "name": "path-scoped-rules",
   "version": "0.1.0",
   "private": true,
+  "license": "MIT",
+  "files": ["dist"],
   "type": "module",
   "exports": "./dist/index.js",
   "engines": {
@@ -20,7 +22,12 @@
     "yaml": "^2.8.0"
   },
   "devDependencies": {
+    "@semantic-release/commit-analyzer": "^13.0.1",
+    "@semantic-release/github": "^12.0.11",
+    "@semantic-release/release-notes-generator": "^14.1.1",
     "@types/node": "^24.0.0",
+    "conventional-changelog-conventionalcommits": "^9.3.1",
+    "semantic-release": "^25.0.9",
     "typescript": "~5.9.3"
   }
 }

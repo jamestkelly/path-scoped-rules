@@ -4,6 +4,14 @@ An OpenCode 2.3.2 server plugin that loads Markdown guidance for the files an ag
 
 ## Use locally
 
+Once the first release is published, install its major version from GitHub:
+
+```sh
+opencode plugin add github:jamestkelly/path-scoped-rules#v1
+```
+
+For reproducible installs, replace `v1` with the packaged commit SHA from a [GitHub Release](https://github.com/jamestkelly/path-scoped-rules/releases). To share it across a team, add the same Git specifier to the project's `plugins` array. To build directly from source instead, use the instructions below.
+
 With Node.js 24 and pnpm, run `pnpm install --frozen-lockfile` and `pnpm validate` in this checkout. Add its absolute directory to `plugins` in your project's `opencode.jsonc`, or in `~/.config/opencode/opencode.jsonc` for all projects:
 
 ```jsonc
@@ -37,3 +45,5 @@ For a direct write, the index asks the agent to read applicable rules **before c
 ## Development
 
 Use `pnpm test` for behavior tests, `pnpm typecheck` for strict TypeScript checks, and `pnpm build` to update `dist/`. `pnpm validate` runs all three. Commit changes using Conventional Commits.
+
+See [Contributing](CONTRIBUTING.md), [Security](SECURITY.md), and the [MIT license](LICENSE).
