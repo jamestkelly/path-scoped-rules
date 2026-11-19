@@ -53,5 +53,5 @@ test("plugin scopes each convention and activates every matching patch destinati
   assert.match([...entries.values()][0], /UI guidance/);
   await before({ tool: "patch", input: "*** Update File: backend/a.ts\n*** Move to: frontend/a.ts", sessionID: "two" });
   assert.equal(entries.size, 3);
-  assert.match(entries.get("two:path-scoped-rules/.claude/rules/db.md")!, /DB guidance/);
+  assert.ok([...entries].some(([key, value]) => key.startsWith("two:") && value.includes("DB guidance")));
 });

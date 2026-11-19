@@ -1,0 +1,41 @@
+import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import test from "node:test";
+
+test("packages source-only revisions, preserves tagged history and reuses an existing build", t => {
+  const cwd = mkdtempSync(join(tmpdir(), "plugin-release-"));
+  t.after(() => rmSync(cwd, { recursive: true, force: true }));
+  const git = (...args: string[]) => execFileSync("git", args, { cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }).trim();
+  const script = resolve("scripts/package-release.sh");
+  const build = (content: string) => {
+    mkdirSync(join(cwd, "dist"), { recursive: true });
+    writeFileSync(join(cwd, "dist/index.js"), "export * from './rules.js';");
+    writeFileSync(join(cwd, "dist/rules.js"), content);
+    execFileSync("bash", [script], { cwd, stdio: "pipe" });
+    return git("rev-parse", "HEAD");
+  };
+  git("init", "-b", "main");
+  git("init", "--bare", "remote.git");
+  git("remote", "add", "origin", "./remote.git");
+  git("config", "user.name", "Test");
+  git("config", "user.email", "test@example.org");
+  writeFileSync(join(cwd, ".gitignore"), "/dist/\n/remote.git/\n");
+  git("add", ".gitignore");
+  git("commit", "-m", "feat: First source");
+  const first = build("first");
+  git("tag", "v1.0.0");
+  git("switch", "main");
+  git("commit", "--allow-empty", "-m", "fix: Second source");
+  const source = git("rev-parse", "HEAD");
+  const second = build("second");
+  assert.equal(git("rev-parse", "HEAD^1"), source);
+  assert.equal(git("rev-parse", "HEAD^2"), first);
+  assert.equal(git("describe", "--tags", "--abbrev=0"), "v1.0.0");
+  assert.equal(git("show", "origin/release-dist:dist/rules.js"), "second");
+  assert.equal(git("ls-tree", "main", "dist"), "");
+  git("switch", "main");
+  assert.equal(build("second"), second);
+});
