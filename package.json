@@ -1,0 +1,26 @@
+{
+  "name": "path-scoped-rules",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./dist/index.js",
+  "engines": {
+    "node": ">=24"
+  },
+  "packageManager": "pnpm@12.16.1",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc -p tsconfig.check.json",
+    "test": "node --test test/*.test.ts",
+    "validate": "pnpm typecheck && pnpm test && pnpm build"
+  },
+  "dependencies": {
+    "@opencode/plugin": "2.3.2",
+    "minimatch": "^10.2.5",
+    "yaml": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "~5.9.3"
+  }
+}

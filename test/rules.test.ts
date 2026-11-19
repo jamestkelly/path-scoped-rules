@@ -1,0 +1,57 @@
+import assert from "node:assert/strict";
+import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
+import test from "node:test";
+import plugin from "../src/index.ts";
+import { matches, parseRule } from "../src/rules.ts";
+
+test("invalid scopes never silently become global", () => {
+  assert.throws(() => parseRule("bad.md", "---\npaths: 123\n---\nhello"), /paths/);
+  assert.throws(() => parseRule("bad.md", "---\npaths: []"), /unclosed/);
+});
+
+test("relative paths use the workspace; exclusions and checkout boundaries win", () => {
+  const rule = parseRule("testing.md", "---\npaths: ['backend/**/*.{ts,js}', '!backend/**/deploy/**']\n---\nTest");
+  assert.ok(matches(rule, "/repo", "/repo/backend", "service/test.ts"));
+  assert.ok(!matches(rule, "/repo", "/repo/backend", "service/deploy/test.js"));
+  assert.ok(!matches(rule, "/repo", "/repo/backend", "/other/backend/test.ts"));
+});
+
+test("plugin scopes each convention and activates every matching patch destination", async t => {
+  const root = await mkdtemp(join(tmpdir(), "path-scoped-rules-"));
+  t.after(() => rm(root, { recursive: true, force: true }));
+  for (const [file, content] of Object.entries({
+    ".agent/common.md": "All contributors",
+    ".agent/skills/example.md": "Not a rule",
+    ".agent/rules/ui/view.md": "---\npaths: 'frontend/**'\n---\nUI guidance",
+    ".claude/rules/db.md": "---\npaths: ['backend/**']\n---\nDB guidance",
+  })) {
+    await mkdir(dirname(join(root, file)), { recursive: true });
+    await writeFile(join(root, file), content);
+  }
+  const entries = new Map<string, string>();
+  type ContextHook = (event: { system: { text: string }[] }) => Promise<void>;
+  type BeforeHook = (event: { tool: string; input: unknown; sessionID: string }) => Promise<void>;
+  type Entry = { sessionID: string; key: string; value: string };
+  let context!: ContextHook;
+  let before!: BeforeHook;
+  const host = {
+    location: { directory: root, project: { directory: root } },
+    session: { hook: (_: string, fn: ContextHook) => { context = fn; },
+      instructions: { entry: { put: ({ sessionID, key, value }: Entry) =>
+      entries.set(`${sessionID}:${key}`, value) } } },
+    tool: { hook: (_: string, fn: BeforeHook) => { before = fn; } },
+  };
+  await plugin.setup(host as unknown as Parameters<typeof plugin.setup>[0]);
+  const system: { text: string }[] = [];
+  await context({ system });
+  assert.match(system.map(p => p.text).join("\n"), /All contributors/);
+  assert.doesNotMatch(system.map(p => p.text).join("\n"), /UI guidance|DB guidance|Not a rule/);
+  await before({ tool: "read", input: { path: "frontend/view.ts" }, sessionID: "one" });
+  assert.equal(entries.size, 1);
+  assert.match([...entries.values()][0], /UI guidance/);
+  await before({ tool: "patch", input: "*** Update File: backend/a.ts\n*** Move to: frontend/a.ts", sessionID: "two" });
+  assert.equal(entries.size, 3);
+  assert.match(entries.get("two:path-scoped-rules/.claude/rules/db.md")!, /DB guidance/);
+});
