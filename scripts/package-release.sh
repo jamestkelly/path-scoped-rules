@@ -18,5 +18,8 @@ if git show-ref --verify --quiet "$previous"; then
   git merge --no-ff --no-commit -s ours "$previous"
 fi
 git add --force -- dist/
+jq 'del(.scripts, .devDependencies)' package.json > package.runtime.json
+mv package.runtime.json package.json
+git add package.json
 git commit -m 'build: Package OpenCode plugin'
 git push origin HEAD:refs/heads/release-dist

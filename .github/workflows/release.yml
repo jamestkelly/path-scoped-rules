@@ -40,6 +40,8 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           bash scripts/package-release.sh
+      - name: Install Candidate With OpenCode
+        run: bash scripts/smoke-git-install.sh "$(git rev-parse HEAD)"
       - name: Publish Version and Release Notes
         env:
           GITHUB_TOKEN: ${{ github.token }}
