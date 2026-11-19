@@ -1,15 +1,17 @@
 # path-scoped-rules
 
-Give [OpenCode](https://opencode.ai) the Markdown rules that apply to the file it’s working on. Reuse your existing `.claude/rules/` files: a backend logging rule can stay out of the conversation until the agent reads backend code. Tested with OpenCode 2.3.2.
+Give [OpenCode](https://opencode.ai) the Markdown rules that apply to the file it’s working on. Reuse your existing `.claude/rules/` files: a backend logging rule can stay out of the conversation until the agent reads backend code.
 
 ## Install
 
-To use the plugin in **all your OpenCode projects**, install the [v1.0.1 release](https://github.com/jamestkelly/path-scoped-rules/releases/tag/v1.0.1) and check that it appears in the plugin list:
+To use the plugin in **all your OpenCode projects**, install from the `v1` tag and check that it appears in the plugin list:
 
 ```sh
-opencode plugin add github:jamestkelly/path-scoped-rules#v1.0.1
+opencode plugin add github:jamestkelly/path-scoped-rules#v1
 opencode plugin list
 ```
+
+`v1` points to the newest compatible 1.x release. To check for and apply updates, use `opencode plugin check` and `opencode plugin update`. For a reproducible install, use a release commit as described below.
 
 ## Quick start
 
@@ -36,16 +38,16 @@ Once activated, the rule stays in that session. Reading a different file later d
 
 ## Share with a team
 
-Add this entry to `plugins` in the project's `opencode.jsonc` or `.opencode/opencode.jsonc`. This pins the packaged commit for v1.0.1; contributors do not need a separate global install.
+For reproducible team installs, choose a version from [GitHub Releases](https://github.com/jamestkelly/path-scoped-rules/releases) and copy the full commit SHA its tag points to. Replace `<release-commit-sha>` below with that SHA and commit the entry in `opencode.jsonc` or `.opencode/opencode.jsonc`. Contributors do not need a separate global install.
 
 ```jsonc
 {
   "$schema": "https://opencode.ai/config.json",
-  "plugins": ["github:jamestkelly/path-scoped-rules#2fd74d2c2552cfcb2086dfb10a561975abedcbda"]
+  "plugins": ["github:jamestkelly/path-scoped-rules#<release-commit-sha>"]
 }
 ```
 
-Use a tag or commit from [GitHub Releases](https://github.com/jamestkelly/path-scoped-rules/releases) rather than `main`: released revisions include the built plugin.
+To upgrade, replace the pin with the next release commit you’ve reviewed. Use a released revision rather than `main`: only released revisions are packaged for installation.
 
 ## Rule discovery
 
