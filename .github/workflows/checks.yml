@@ -1,6 +1,7 @@
 name: Checks
 on:
   pull_request:
+    types: [opened, reopened, edited, synchronize]
   workflow_call:
 permissions:
   contents: read
@@ -37,10 +38,21 @@ jobs:
     steps:
       - name: Check Branch Name
         uses: jamestkelly/branch-name-check@1cb7c8ecfab5ec076f278a9b3c84f9ae108e49e1 # v1.0.0
+  pr-title:
+    name: Validate PR Title
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Conventional Commit Title
+        uses: amannn/action-semantic-pull-request@2252a14e810aa9b85c2d560bd7070c802206ecf6 # v6.1.2
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
   review-gate:
     name: Review Gate
     if: always() && github.event_name == 'pull_request'
-    needs: [validate, branch-name]
+    needs: [validate, branch-name, pr-title]
     runs-on: ubuntu-latest
     permissions: {}
     steps:

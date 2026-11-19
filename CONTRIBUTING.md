@@ -11,7 +11,7 @@ bash scripts/smoke-package.sh
 actionlint
 ```
 
-PRs require **Review Gate**: the source branch name, plugin validation, and packed-install smoke test must pass. Use a Conventional Commit PR title; squash merges use it for release notes.
+PRs require **Review Gate**: the source branch name, PR title, plugin validation, and packed-install smoke test must pass. Use a Conventional Commit PR title such as `fix: Handle an empty rule file`; squash merges use it for release notes. Editing the title reruns the checks.
 
 `pnpm validate` launches the pinned OpenCode CLI against a loopback model stub. It checks that a rule body first appears in the model request after a matching read. No provider credentials are needed. Keep the CLI and plugin SDK versions aligned when upgrading.
 
