@@ -1,29 +1,21 @@
 # path-scoped-rules
 
-An OpenCode 2.3.2 server plugin that loads Markdown guidance for the files an agent works on. Keep rules under `.claude/rules/` or `.agent/rules/` (both recursive), or directly under `.agent/`. The plugin combines these sources and ignores unrelated `.agent/` subdirectories.
+Give [OpenCode](https://opencode.ai) the Markdown rules that apply to the file it’s working on. Reuse your existing `.claude/rules/` files: a backend logging rule can stay out of the conversation until the agent reads backend code.
 
-## Use locally
+## Install
 
-Once the first release is published, install its major version from GitHub:
+To use the plugin in **all your OpenCode projects**, install from the `v1` tag and check that it appears in the plugin list:
 
 ```sh
 opencode plugin add github:jamestkelly/path-scoped-rules#v1
+opencode plugin list
 ```
 
-For reproducible installs, replace `v1` with the packaged commit SHA from a [GitHub Release](https://github.com/jamestkelly/path-scoped-rules/releases). To share it across a team, add the same Git specifier to the project's `plugins` array. To build directly from source instead, use the instructions below.
+`v1` points to the newest compatible 1.x release. To check for and apply updates, use `opencode plugin check` and `opencode plugin update`. For a reproducible install, use a release commit as described below.
 
-With Node.js 24 and pnpm, run `pnpm install --frozen-lockfile` and `pnpm validate` in this checkout. Add its absolute directory to `plugins` in your project's `opencode.jsonc`, or in `~/.config/opencode/opencode.jsonc` for all projects:
+## Quick start
 
-```jsonc
-{
-  "$schema": "https://opencode.ai/config.json",
-  "plugins": ["/absolute/path/to/path-scoped-rules"]
-}
-```
-
-Keep the checkout in place. After editing rules, use OpenCode's `/reload` and start a fresh session.
-
-## Rule format
+Save this as `.claude/rules/logging.md`:
 
 ```markdown
 ---
@@ -33,6 +25,33 @@ paths:
 ---
 Use the project's structured logger in backend code.
 ```
+
+After adding or editing a rule, run `/reload` in OpenCode and start a fresh session. For the rule above:
+
+| First file read | Is the logging instruction in the next model request? |
+| --- | --- |
+| `backend/orders/create.ts` | Yes |
+| `backend/orders/deploy/stack.ts` | No — explicitly excluded |
+| `frontend/orders/create.ts` | No — outside `backend/` |
+
+Once activated, the rule stays in that session. Reading a different file later does not remove it.
+
+## Share with a team
+
+For reproducible team installs, choose a version from [GitHub Releases](https://github.com/jamestkelly/path-scoped-rules/releases) and copy the full commit SHA its tag points to. Replace `<release-commit-sha>` below with that SHA and commit the entry in `opencode.jsonc` or `.opencode/opencode.jsonc`. Contributors do not need a separate global install.
+
+```jsonc
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugins": ["github:jamestkelly/path-scoped-rules#<release-commit-sha>"]
+}
+```
+
+To upgrade, replace the pin with the next release commit you’ve reviewed. Use a released revision rather than `main`: only released revisions are packaged for installation.
+
+## Rule discovery
+
+The plugin combines `.claude/rules/**/*.md`, `.agent/rules/**/*.md`, and `.agent/*.md`. Other `.agent/` subdirectories are ignored.
 
 Patterns match repository-relative paths, including dotfiles. A match on an exclusion wins. A single glob string also works. Omit `paths` for an always-on rule. Rule discovery reads regular `.md` files; it does not traverse symlinked entries.
 
@@ -44,6 +63,6 @@ For a direct write, the index asks the agent to read applicable rules **before c
 
 ## Development
 
-Use `pnpm test` for behavior tests, `pnpm typecheck` for strict TypeScript checks, and `pnpm build` to update `dist/`. `pnpm validate` runs all three. Commit changes using Conventional Commits.
+To try a local change, run `pnpm install --frozen-lockfile` and `pnpm validate` with Node.js 24 in this checkout. Validation type-checks, runs the tests, builds `dist/`, and verifies rule delivery in a real OpenCode session. Set the `plugins` entry in your test project's config to the absolute path of this checkout.
 
 See [Contributing](CONTRIBUTING.md), [Security](SECURITY.md), and the [MIT license](LICENSE).
