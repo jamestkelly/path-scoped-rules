@@ -1,0 +1,12 @@
+name: Standard PR Checks
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions: {}
+
+jobs:
+  branch-name:
+    name: Branch Name Check
+    uses: jamestkelly/branch-name-check/.github/workflows/branch-name-check.yml@23730336ba6d3de4bc8589ca8f1e4c65d86c19a8
