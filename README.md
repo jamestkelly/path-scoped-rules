@@ -36,6 +36,8 @@ After adding or editing a rule, run `/reload` in OpenCode and start a fresh sess
 
 Once activated, the rule stays in that session. Reading a different file later does not remove it.
 
+In the OpenCode terminal, enter `/rules` to see the count and paths of the scoped rules applied in the current session. Each path appears once, regardless of how often it matched. The list excludes always-on guidance and rules that appear only in the startup index. “Applied” means delivered as a session instruction, not verified compliance.
+
 ## Share with a team
 
 For reproducible team installs, choose a version from [GitHub Releases](https://github.com/jamestkelly/path-scoped-rules/releases) and copy the full commit SHA its tag points to. Replace `<release-commit-sha>` below with that SHA and commit the entry in `opencode.jsonc` or `.opencode/opencode.jsonc`. Contributors do not need a separate global install.
