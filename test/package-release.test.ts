@@ -23,7 +23,8 @@ test("packages source-only revisions, preserves tagged history and reuses an exi
   git("config", "user.name", "Test");
   git("config", "user.email", "test@example.org");
   writeFileSync(join(cwd, ".gitignore"), "/dist/\n/remote.git/\n");
-  git("add", ".gitignore");
+  writeFileSync(join(cwd, "package.json"), JSON.stringify({name: "fixture", scripts: {build: "tsc"}, devDependencies: {typescript: "5"}, dependencies: {yaml: "2"}}));
+  git("add", ".gitignore", "package.json");
   git("commit", "-m", "feat: First source");
   const first = build("first");
   git("tag", "v1.0.0");
@@ -35,6 +36,7 @@ test("packages source-only revisions, preserves tagged history and reuses an exi
   assert.equal(git("rev-parse", "HEAD^2"), first);
   assert.equal(git("describe", "--tags", "--abbrev=0"), "v1.0.0");
   assert.equal(git("show", "origin/release-dist:dist/rules.js"), "second");
+  assert.deepEqual(JSON.parse(git("show", "origin/release-dist:package.json")), {name: "fixture", dependencies: {yaml: "2"}});
   assert.equal(git("ls-tree", "main", "dist"), "");
   git("switch", "main");
   assert.equal(build("second"), second);
