@@ -33,7 +33,10 @@ jobs:
     name: Validate Source Branch
     if: github.event_name == 'pull_request'
     permissions: {}
-    uses: jamestkelly/branch-name-check/.github/workflows/branch-name-check.yml@1cb7c8ecfab5ec076f278a9b3c84f9ae108e49e1
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Branch Name
+        uses: jamestkelly/branch-name-check@1cb7c8ecfab5ec076f278a9b3c84f9ae108e49e1 # v1.0.0
   review-gate:
     name: Review Gate
     if: always() && github.event_name == 'pull_request'
