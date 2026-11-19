@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "license": "MIT",
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "exports": "./dist/index.js",
   "engines": {
@@ -14,7 +16,8 @@
     "build": "tsc",
     "typecheck": "tsc -p tsconfig.check.json",
     "test": "node --test test/*.test.ts",
-    "validate": "pnpm typecheck && pnpm test && pnpm build"
+    "test:host": "node --test test/opencode.smoke.ts",
+    "validate": "pnpm typecheck && pnpm test && pnpm build && pnpm test:host"
   },
   "dependencies": {
     "@opencode/plugin": "2.3.2",
@@ -22,6 +25,7 @@
     "yaml": "^2.8.0"
   },
   "devDependencies": {
+    "@opencode/cli": "2.3.2",
     "@semantic-release/commit-analyzer": "^13.0.1",
     "@semantic-release/github": "^12.0.11",
     "@semantic-release/release-notes-generator": "^14.1.1",

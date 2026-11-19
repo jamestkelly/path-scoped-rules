@@ -13,6 +13,8 @@ actionlint
 
 PRs require **Review Gate**: the source branch name, plugin validation, and packed-install smoke test must pass. Use a Conventional Commit PR title; squash merges use it for release notes.
 
+`pnpm validate` launches the pinned OpenCode CLI against a loopback model stub. It checks that a rule body first appears in the model request after a matching read. No provider credentials are needed. Keep the CLI and plugin SDK versions aligned when upgrading.
+
 ## Releases
 
 On `main`, CI rebuilds the package and makes a commit containing `dist/` on `release-dist`. Semantic-release tags that packaged commit and publishes a GitHub Release for release-worthy changes. Breaking changes bump major, `feat` bumps minor, and `fix`, `perf`, or `chore` bump patch. Docs, CI, and tests alone do not produce versions.

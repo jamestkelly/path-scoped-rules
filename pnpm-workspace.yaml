@@ -1,0 +1,2 @@
+allowBuilds:
+  '@opencode/cli': true

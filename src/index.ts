@@ -1,4 +1,5 @@
 import { Plugin } from "@opencode/plugin";
+import { createHash } from "node:crypto";
 import { loadRules, matches, targets } from "./rules.ts";
 
 export default Plugin.define({
@@ -23,7 +24,7 @@ export default Plugin.define({
         if (paths.some(path => matches(rule, root, ctx.location.directory, path))) {
           await ctx.session.instructions.entry.put({
             sessionID: event.sessionID,
-            key: `path-scoped-rules/${rule.file}`,
+            key: `path-scoped-rules.${createHash("sha256").update(rule.file).digest("hex")}`,
             value: `${rule.file}\n${rule.text}`,
           });
         }
