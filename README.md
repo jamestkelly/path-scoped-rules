@@ -63,7 +63,9 @@ Patterns match repository-relative paths, including dotfiles. A match on an excl
 
 Unscoped text and an index of scoped rule paths are included before model decisions. For explicit `read`, `edit`, `write`, and `patch` targets, matching rule bodies become keyed session instructions for subsequent decisions. A multi-file patch activates rules for both sides of a move.
 
-For a direct write, the index asks the agent to read applicable rules **before composing** the change. A tool hook cannot retroactively change a patch the model already wrote. The plugin supplies guidance, not enforcement. It does not infer files accessed inside shell commands or MCP tools.
+If an `edit`, `write`, or `patch` targets a file whose scoped rules were not in the model request, the plugin stops that tool call **before it changes any files**. It loads all missing rules and asks the agent to reconsider and retry. A matching read in the same batch does not bypass this check. Once the rules have been presented, the agent can proceed without another read or human approval.
+
+This checks that the model had the guidance, not that the change follows it. Files modified inside shell commands and MCP tools are outside the check.
 
 ## Development
 
