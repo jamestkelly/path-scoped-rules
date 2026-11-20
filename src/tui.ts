@@ -5,6 +5,7 @@ const plugin: Plugin.Definition = {
   id: "path-scoped-rules",
   setup({ client, keymap, ui }) {
     keymap.layer(() => ({
+      mode: "global",
       commands: [{
         id: "path-scoped-rules.show",
         title: "Show applied path-scoped rules",

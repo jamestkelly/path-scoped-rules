@@ -7,7 +7,11 @@ test("/rules lists only activated scoped paths from the selected session", async
   let command!: { slash: { name: string }; run(): Promise<void> };
   const dialogs: { title: string; message: string }[] = [];
   const host = {
-    keymap: { layer(factory: () => { commands: typeof command[] }) { [command] = factory().commands; } },
+    keymap: { layer(factory: () => { mode?: string; commands: typeof command[] }) {
+      const layer = factory();
+      assert.equal(layer.mode, "global", "slash command must be reachable with the prompt focused");
+      [command] = layer.commands;
+    } },
     ui: {
       router: { current: () => ({ type: "session", sessionID }) },
       dialog: { alert: (dialog: typeof dialogs[number]) => dialogs.push(dialog) },
