@@ -10,6 +10,14 @@ export interface Rule {
   text: string;
 }
 
+/** Encode a discovered Markdown path as a readable, slash-free OpenCode entry key. */
+export function ruleKey(file: string): string {
+  const stem = file.slice(1, -3);
+  const parts = stem.split(sep).map(part =>
+    part.replace(/[^a-z0-9-]/gu, char => `_${Buffer.from(char).toString("hex")}_`));
+  return `path-scoped-rules.${parts.join(".")}.md`;
+}
+
 /** Split Markdown from YAML without treating invalid frontmatter as global guidance. */
 export function parseRule(file: string, markdown: string): Rule {
   const source = markdown.replace(/^\uFEFF/, "").replaceAll("\r\n", "\n");

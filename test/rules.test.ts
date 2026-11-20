@@ -4,7 +4,14 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import test from "node:test";
 import plugin from "../src/index.ts";
-import { matches, parseRule } from "../src/rules.ts";
+import { matches, parseRule, ruleKey } from "../src/rules.ts";
+
+test("entry keys show the rule path without conflating directories, punctuation or case", () => {
+  assert.equal(ruleKey(join(".claude", "rules", "backend", "code-style.md")), "path-scoped-rules.claude.rules.backend.code-style.md");
+  const keys = ["a/b", "a.b", "A.b", "a_2e_b", "a b", "日本語"].map(name => ruleKey(join(".agent", `${name}.md`)));
+  assert.equal(new Set(keys).size, keys.length);
+  for (const key of keys) assert.match(key, /^[a-z0-9][a-z0-9._-]*$/);
+});
 
 test("invalid scopes never silently become global", () => {
   assert.throws(() => parseRule("bad.md", "---\npaths: 123\n---\nhello"), /paths/);
