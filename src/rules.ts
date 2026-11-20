@@ -71,7 +71,7 @@ export function targets(tool: string, input: unknown): string[] {
   if (tool === "patch" || tool === "apply_patch") {
     const patch = typeof input === "object" && input !== null && "patchText" in input ? input.patchText : input;
     return typeof patch === "string"
-      ? Array.from(patch.matchAll(/^\*\*\* (?:Add File|Delete File|Update File|Move to): (.+?)\r?$/gm), m => m[1])
+      ? Array.from(patch.matchAll(/^[ \t]*\*\*\* (?:Add File|Delete File|Update File|Move to): (.+?)\r?$/gm), m => m[1].trim())
       : [];
   }
   if (!["read", "edit", "write"].includes(tool) || typeof input !== "object" || !input) return [];

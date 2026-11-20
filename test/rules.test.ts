@@ -38,7 +38,7 @@ test("plugin scopes each convention and activates every matching patch destinati
     await writeFile(join(root, file), content);
   }
   const entries = new Map<string, string>();
-  type ContextHook = (event: { system: { text: string }[] }) => Promise<void>;
+  type ContextHook = (event: { sessionID: string; system: { text: string }[]; messages: unknown[] }) => Promise<void>;
   type BeforeHook = (event: { tool: string; input: unknown; sessionID: string }) => Promise<void>;
   type Entry = { sessionID: string; key: string; value: string };
   let context!: ContextHook;
@@ -46,19 +46,26 @@ test("plugin scopes each convention and activates every matching patch destinati
   const host = {
     location: { directory: root, project: { directory: root } },
     session: { hook: (_: string, fn: ContextHook) => { context = fn; },
-      instructions: { entry: { put: ({ sessionID, key, value }: Entry) =>
+      instructions: { entry: { list: ({ sessionID }: { sessionID: string }) =>
+        [...entries].filter(([id]) => id.startsWith(`${sessionID}:`)).map(([id, value]) => ({ key: id.slice(sessionID.length + 1), value })),
+        put: ({ sessionID, key, value }: Entry) =>
       entries.set(`${sessionID}:${key}`, value) } } },
     tool: { hook: (_: string, fn: BeforeHook) => { before = fn; } },
   };
   await plugin.setup(host as unknown as Parameters<typeof plugin.setup>[0]);
   const system: { text: string }[] = [];
-  await context({ system });
+  await context({ system, sessionID: "one", messages: [] });
   assert.match(system.map(p => p.text).join("\n"), /All contributors/);
   assert.doesNotMatch(system.map(p => p.text).join("\n"), /UI guidance|DB guidance|Not a rule/);
   await before({ tool: "read", input: { path: "frontend/view.ts" }, sessionID: "one" });
   assert.equal(entries.size, 1);
   assert.match([...entries.values()][0], /UI guidance/);
-  await before({ tool: "patch", input: "*** Update File: backend/a.ts\n*** Move to: frontend/a.ts", sessionID: "two" });
+  const move = { tool: "patch", input: "*** Update File: backend/a.ts\n*** Move to: frontend/a.ts", sessionID: "two" };
+  await assert.rejects(before(move), /No files changed.*\.agent\/rules\/ui\/view\.md.*\.claude\/rules\/db\.md/);
   assert.equal(entries.size, 3);
   assert.ok([...entries].some(([key, value]) => key.startsWith("two:") && value.includes("DB guidance")));
+  await assert.rejects(before({ tool: "edit", input: { path: "frontend/view.ts" }, sessionID: "one" }), /No files changed/);
+  await context({ sessionID: "one", messages: [], system: [{ text: [...entries.values()][0] }] });
+  await before({ tool: "write", input: { path: "frontend/view.ts" }, sessionID: "one" });
+  await before({ tool: "edit", input: { path: "README.md" }, sessionID: "two" });
 });
