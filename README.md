@@ -36,6 +36,8 @@ After adding or editing a rule, run `/reload` in OpenCode and start a fresh sess
 
 Once activated, the rule stays in that session. Reading a different file later does not remove it.
 
+OpenCode’s **Instructions updated** notice shows a dotted path. For `.claude/rules/logging.md`, it displays `api/path-scoped-rules.claude.rules.logging.md`. OpenCode does not allow slashes inside the entry key; special characters in filenames are escaped. Start a fresh session after upgrading if you still see old hash-based entries.
+
 In the OpenCode terminal, enter `/rules` to see the count and paths of the scoped rules applied in the current session. Each path appears once, regardless of how often it matched. The list excludes always-on guidance and rules that appear only in the startup index. “Applied” means delivered as a session instruction, not verified compliance.
 
 ## Share with a team
